@@ -1,5 +1,11 @@
+
+
+
+
+
+
 const { zokou } = require("../framework/zokou")
-//const { getGroupe } = require("../bdd/group")
+//const { getGroup } = require("../bdd/groupe")
 const { Sticker, StickerTypes } = require('wa-sticker-formatter');
 const {ajouterOuMettreAJourJid,mettreAJourAction,verifierEtatJid} = require("../bdd/antilien")
 const {atbajouterOuMettreAJourJid,atbverifierEtatJid} = require("../bdd/antibot")
@@ -31,12 +37,12 @@ zokou({ nomCom: "tagall", categorie: 'Group', reaction: "📣" }, async (dest, z
   tag +=`
   
 ◈━━━━━━━━━━━━━━━━◈
-│⛔  𝐓𝐀𝐆𝐒
+│ 𝐓𝐎𝐗𝐈𝐂  𝐌𝐃 𝐓𝐀𝐆𝐒
 ◈━━━━━━━━━━━━━━━━◈ \n
-Group : ${nomGroupe} 
-Hey😀 : ${nomAuteurMessage}
-Message : ${mess} 
-◈━━━━━━━━━━━━━━━━◈\n
+│⭕ *Group* : ${nomGroupe} 
+│⭕ *Hey🙃* : *${nomAuteurMessage}* 
+│⭕ *Message* : *${mess}* 
+╰─────────────━┈⊷\n
 \n
 
 ` ;
@@ -44,7 +50,7 @@ Message : ${mess}
 
 
 
-  let emoji = ['🦴', '👀', '😮‍💨', '❌', '✔️', '😇', '⚙️', '🔧', '🎊', '😡', '🙏🏿', '⛔️', '$','😟','🥵','🐅']
+  let emoji = ['🦴', '👀', '🌞', '✨', '✔️', '😇', '⚙️', '🔧', '🎊', '☃️', '🤖', '🌚', '$','🌜','🥵','🐅']
   let random = Math.floor(Math.random() * (emoji.length - 1))
 
 
@@ -57,14 +63,14 @@ Message : ${mess}
 
   zk.sendMessage(dest, { text: tag, mentions: membresGroupe.map((i) => i.id) }, { quoted: ms })
 
-   } else { repondre('command reserved for admins')}
+   } else { repondre('𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖')}
 
 });
 
 
 zokou({ nomCom: "link", categorie: 'Group', reaction: "🙋" }, async (dest, zk, commandeOptions) => {
   const { repondre, nomGroupe, nomAuteurMessage, verifGroupe } = commandeOptions;
-  if (!verifGroupe) { repondre("wait bro , you want the link to my dm?"); return; };
+  if (!verifGroupe) { repondre("wait bro, you want the link to your dm?"); return; };
 
 
   var link = await zk.groupInviteCode(dest)
@@ -72,13 +78,13 @@ zokou({ nomCom: "link", categorie: 'Group', reaction: "🙋" }, async (dest, zk,
 
   let mess = `hello ${nomAuteurMessage} , here is the group link for ${nomGroupe} \n
 
-Group link :${lien} \n\n𝐓𝐨𝐱𝐢𝐜-𝐌𝐃™`
+Group link :${lien} \n\n©𝐓𝐎𝐗𝐈𝐂™`
   repondre(mess)
 
 
 });
 /** *nommer un membre comme admin */
-zokou({ nomCom: "promote", categorie: 'Group', reaction: "👨🏿‍💼" }, async (dest, zk, commandeOptions) => {
+zokou({ nomCom: "promote", categorie: 'Group', reaction: "⭐" }, async (dest, zk, commandeOptions) => {
   let { repondre, msgRepondu, infosGroupe, auteurMsgRepondu, verifGroupe, auteurMessage, superUser, idBot } = commandeOptions;
   let membresGroupe = verifGroupe ? await infosGroupe.participants : ""
   if (!verifGroupe) { return repondre("For groups only"); }
@@ -132,7 +138,7 @@ zokou({ nomCom: "promote", categorie: 'Group', reaction: "👨🏿‍💼" }, as
         else { return repondre("Sorry, I cannot perform this action because I am not an administrator of the group.") }
 
       } else { repondre("please tag the member to be nominated"); }
-    } else { return repondre("Sorry I cannot perform this action because you are not an administrator of the group.") }
+    } else { return repondre("𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖.") }
   } catch (e) { repondre("oups " + e) }
 
 })
@@ -140,7 +146,7 @@ zokou({ nomCom: "promote", categorie: 'Group', reaction: "👨🏿‍💼" }, as
 //fin nommer
 /** ***demettre */
 
-zokou({ nomCom: "demote", categorie: 'Group', reaction: "👨🏿‍💼" }, async (dest, zk, commandeOptions) => {
+zokou({ nomCom: "demote", categorie: 'Group', reaction: "👺" }, async (dest, zk, commandeOptions) => {
   let { repondre, msgRepondu, infosGroupe, auteurMsgRepondu, verifGroupe, auteurMessage, superUser, idBot } = commandeOptions;
   let membresGroupe = verifGroupe ? await infosGroupe.participants : ""
   if (!verifGroupe) { return repondre("For groups only"); }
@@ -197,16 +203,16 @@ zokou({ nomCom: "demote", categorie: 'Group', reaction: "👨🏿‍💼" }, asy
         else { return repondre("Sorry I cannot perform this action because I am not an administrator of the group.") }
 
       } else { repondre("please tag the member to be removed"); }
-    } else { return repondre("Sorry I cannot perform this action because you are not an administrator of the group.") }
+    } else { return repondre("𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖.") }
   } catch (e) { repondre("oups " + e) }
 
 })
 
 
 
-/** ***fin démettre****  **/
+/** ***func remove****  **/
 /** **retirer** */
-zokou({ nomCom: "remove", categorie: 'Group', reaction: "👨🏿‍💼" }, async (dest, zk, commandeOptions) => {
+zokou({ nomCom: "remove", categorie: 'Group', reaction: "👺" }, async (dest, zk, commandeOptions) => {
   let { repondre, msgRepondu, infosGroupe, auteurMsgRepondu, verifGroupe, nomAuteurMessage, auteurMessage, superUser, idBot } = commandeOptions;
   let membresGroupe = verifGroupe ? await infosGroupe.participants : ""
   if (!verifGroupe) { return repondre("for groups only"); }
@@ -249,7 +255,7 @@ zokou({ nomCom: "remove", categorie: 'Group', reaction: "👨🏿‍💼" }, asy
         if (zkad) {
           if (membre) {
             if (admin == false) {
-              const gifLink = "https://raw.githubusercontent.com/djalega8000/Zokou-MD/main/media/remover.gif"
+              const gifLink = "https://raw.githubusercontent.com/xhclintohn/Toxic-MD/main/media/remover.gif"
               var sticker = new Sticker(gifLink, {
                 pack: 'Toxic-Md', // The pack name
                 author: nomAuteurMessage, // The author name
@@ -273,13 +279,13 @@ zokou({ nomCom: "remove", categorie: 'Group', reaction: "👨🏿‍💼" }, asy
         else { return repondre("Sorry, I cannot perform this action because I am not an administrator of the group.") }
 
       } else { repondre("please tag the member to be removed"); }
-    } else { return repondre("Sorry I cannot perform this action because you are not an administrator of the group .") }
+    } else { return repondre("𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖.") }
   } catch (e) { repondre("oups " + e) }
 
 })
 
 
-/** *****fin retirer */
+/** *****function del*/
 
 
 zokou({ nomCom: "del", categorie: 'Group',reaction:"🧹" }, async (dest, zk, commandeOptions) => {
@@ -325,7 +331,7 @@ zokou({ nomCom: "del", categorie: 'Group',reaction:"🧹" }, async (dest, zk, co
              }catch(e){repondre( "I need admin rights.")}
                     
                       
-               }else{repondre("Sorry, you are not an administrator of the group.")}
+               }else{repondre("𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖.")}
           }
 
 });
@@ -352,7 +358,7 @@ zokou({ nomCom: "info", categorie: 'Group' }, async (dest, zk, commandeOptions) 
 
 
 
- //------------------------------------antilien-------------------------------
+ //------------------------------------Antilink-------------------------------
 
  zokou({ nomCom: "antilink", categorie: 'Group', reaction: "🔗" }, async (dest, zk, commandeOptions) => {
 
@@ -377,7 +383,7 @@ zokou({ nomCom: "info", categorie: 'Group' }, async (dest, zk, commandeOptions) 
                     } else {
                   await ajouterOuMettreAJourJid(dest,"oui");
                 
-              repondre("the antilink is activated successfully") }
+              repondre("𝐓𝐡𝐞 𝐚𝐧𝐭𝐢𝐥𝐢𝐧𝐤 𝐚𝐜𝐭𝐢𝐯𝐚𝐭𝐞𝐝 𝐬𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥𝐥𝐲") }
      
             } else if (arg[0] === "off") {
 
@@ -412,7 +418,7 @@ zokou({ nomCom: "info", categorie: 'Group' }, async (dest, zk, commandeOptions) 
        repondre(error)
     }
 
-  } else { repondre('You are not entitled to this order') ;
+  } else { repondre('𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖') ;
   }
 
 });
@@ -445,7 +451,7 @@ zokou({ nomCom: "info", categorie: 'Group' }, async (dest, zk, commandeOptions) 
                     } else {
                   await atbajouterOuMettreAJourJid(dest,"oui");
                 
-              repondre("the antibot is successfully activated") }
+              repondre("𝐓𝐡𝐞 𝐚𝐧𝐭𝐢𝐛𝐨𝐭 𝐚𝐜𝐭𝐢𝐯𝐚𝐭𝐞𝐝 𝐬𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥𝐥𝐲") }
      
             } else if (arg[0] === "off") {
 
@@ -480,7 +486,7 @@ zokou({ nomCom: "info", categorie: 'Group' }, async (dest, zk, commandeOptions) 
        repondre(error)
     }
 
-  } else { repondre('You are not entitled to this order') ;
+  } else { repondre('𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖') ;
 
   }
 
@@ -660,7 +666,7 @@ zokou({nomCom:"tag",categorie:'Group',reaction:"🎤"},async(dest,zk,commandeOpt
         let media  = await zk.downloadAndSaveMediaMessage(msgRepondu.stickerMessage)
 
         let stickerMess = new Sticker(media, {
-          pack: 'Bmw-mdtag',
+          pack: 'Toxic-mdtag',
           type: StickerTypes.CROPPED,
           categories: ["🤩", "🎉"],
           id: "12345",
@@ -696,73 +702,10 @@ zokou({nomCom:"tag",categorie:'Group',reaction:"🎤"},async(dest,zk,commandeOpt
     }
 
 } else {
-  repondre('Command reserved for administrators.')
+  repondre('𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖.')
 }
 
 });
-
-
-zokou({ nomCom: "apk", reaction: "✨", categorie: "Recherche" }, async (dest, zk, commandeOptions) => {
-  const { repondre, arg, ms } = commandeOptions;
-
-  try {
-    const appName = arg.join(' ');
-    if (!appName) {
-      return repondre("*Enter the name of the application to search for*");
-    }
-
-    const searchResults = await search(appName);
-
-    if (searchResults.length === 0) {
-      return repondre("*can't find application, please enter another name*");
-    }
-
-    const appData = await download(searchResults[0].id);
-    const fileSize = parseInt(appData.size);
-
-    if (fileSize > 300) {
-      return repondre("The file exceeds 300 MB, unable to download.");
-    }
-
-    const downloadLink = appData.dllink;
-    const captionText =
-      "『 *Bmw-Md Application* 』\n\n*Name :* " + appData.name +
-      "\n*Id :* " + appData["package"] +
-      "\n*Last Update :* " + appData.lastup +
-      "\n*Size :* " + appData.size +
-      "\n";
-
-    const apkFileName = (appData?.["name"] || "Downloader") + ".apk";
-    const filePath = apkFileName;
-
-    const response = await axios.get(downloadLink, { 'responseType': "stream" });
-    const fileWriter = fs.createWriteStream(filePath);
-    response.data.pipe(fileWriter);
-
-    await new Promise((resolve, reject) => {
-      fileWriter.on('finish', resolve);
-      fileWriter.on("error", reject);
-    });
-
-    const documentMessage = {
-      'document': fs.readFileSync(filePath),
-      'mimetype': 'application/vnd.android.package-archive',
-      'fileName': apkFileName
-    };
-
-    // Utilisation d'une seule méthode sendMessage pour envoyer l'image et le document
-    zk.sendMessage(dest, { image: { url: appData.icon }, caption: captionText }, { quoted: ms });
-    zk.sendMessage(dest, documentMessage, { quoted: ms });
-
-    // Supprimer le fichier après envoi
-    fs.unlinkSync(filePath);
-  } catch (error) {
-    console.error('Erreur lors du traitement de la commande apk:', error);
-    repondre("*Error during apk command processing*");
-  }
-});
-
-
 
 
 
@@ -778,7 +721,7 @@ zokou({
 
       const {arg , repondre , verifAdmin } = commandeOptions ;
 
-      if (!verifAdmin) { repondre('You are not an administrator of the group') ; return}
+      if (!verifAdmin) { repondre('𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖') ; return}
 
       group_cron = await cron.getCronById(dest) ;
       
@@ -921,7 +864,7 @@ zokou({
 
 
 zokou({
-  nomCom : 'fkick',
+  nomCom : 'antiforeign',
   categorie : 'Group'
 } , async (dest,zk,commandeOptions) => {
 
@@ -946,7 +889,7 @@ zokou({
       }
 
   } else {
-    repondre('Sorry, you are not an administrator of the group')
+    repondre('𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐜𝐚𝐧 𝐨𝐧𝐥𝐲 𝐛𝐞 𝐮𝐬𝐞𝐝 𝐛𝐲 𝐀𝐝𝐦𝐢𝐧 🤖')
   }
 
 

@@ -1,68 +1,109 @@
-const { zokou } = require("../framework/zokou");
-const fs = require("fs");
-const util = require("util");
+import fetch from 'node-fetch';
+import FormData from 'form-data';
+import { fileTypeFromBuffer } from 'file-type';
+import { zokou } from "../framework/zokou.js";
 
-console.log("Attempting to load uploader...");
-try {
-  const { TelegraPh } = require("../../lib/uploader");
-  console.log("Uploader loaded successfully");
-} catch (e) {
-  console.error("Failed to load uploader:", e);
+const MAX_FILE_SIZE_MB = 200;
+
+async function uploadMedia(buffer) {
+  try {
+    const fileType = await fileTypeFromBuffer(buffer);
+    if (!fileType) {
+      throw new Error('Could not determine file type');
+    }
+
+    const bodyForm = new FormData();
+    bodyForm.append("fileToUpload", buffer, `file.${fileType.ext}`);
+    bodyForm.append("reqtype", "fileupload");
+
+    const res = await fetch("https://catbox.moe/user/api.php", {
+      method: "POST",
+      body: bodyForm,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Upload failed with status ${res.status}`);
+    }
+
+    const data = await res.text();
+    if (!data.startsWith('http')) {
+      throw new Error('Invalid response from upload server');
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Upload error:", error);
+    throw new Error(`Upload failed: ${error.message}`);
+  }
 }
-
-// 𝐔𝐭𝐢𝐥𝐢𝐭𝐢𝐞𝐇 𝐌𝐨𝐝𝐮𝐥𝐞
-// 𝐏𝐨𝐰𝐞𝐫𝐞𝐝 𝐛𝐲 𝐱𝐡_𝐜𝐥𝐢𝐧𝐭�{o𝐧
 
 zokou(
   {
     nomCom: "tourl",
-    categorie: "Utilities",
-    reaction: "🍁",
+    categorie: "General",
+    reaction: "🔗",
   },
   async (dest, zk, commandeOptions) => {
-    const { ms, repondre, prefixe, quoted } = commandeOptions;
-
-    console.log("Tourl command triggered");
-
-    // Check if an image is quoted
-    if (!quoted || !/imageMessage/.test(quoted.mtype)) {
-      console.log("No image quoted; mtype:", quoted ? quoted.mtype : "none");
-      return repondre(
-        `𝐄𝐱𝐚𝐦𝐩𝐥𝐞: ${prefixe}𝐭𝐨𝐮𝐫𝐥 <𝐫𝐞𝐩𝐥𝐲 𝐭𝐨 𝐢𝐦𝐚𝐠𝐞>\n\n𝐏𝐥𝐞𝐚𝐻𝐞 𝐫𝐞𝐩𝐥𝐲 𝐭𝐨 𝐚𝐧 𝐢𝐦𝐚𝐠𝐞 𝐭𝐨 𝐠𝐞𝐧𝐞𝐫𝐚𝐭𝐞 𝐚 𝐔𝐑𝐋!`
-      );
-    }
+    const { ms, msgRepondu, repondre } = commandeOptions;
 
     try {
-      repondre(`𝐆𝐞𝐧𝐞𝐫𝐚𝐭𝐢𝐧𝐠 𝐚 𝐔𝐑𝐋 𝐟𝐨𝐫 𝐲𝐨𝐮𝐫 𝐢𝐮𝐚𝐠𝐞...`);
-      console.log("Downloading image...");
+      // Validate message type
+      if (!msgRepondu) {
+        return repondre(`TOXIC-MD\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ Please reply to a media message (image/video/audio)\n◈━━━━━━━━━━━━━━━━◈`);
+      }
 
-      // Download and save the quoted image
-      const media = await zk.downloadAndSaveMediaMessage(quoted);
-      console.log("Image downloaded to:", media);
+      const validTypes = ['imageMessage', 'videoMessage', 'audioMessage'];
+      if (!validTypes.includes(msgRepondu.mtype)) {
+        return repondre(`TOXIC-MD\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ Unsupported media type! Only images, videos and audio\n◈━━━━━━━━━━━━━━━━◈`);
+      }
 
-      // Upload to Telegra.ph
-      const { TelegraPh } = require("../../lib/uploader"); // Load here to avoid early failure
-      const url = await TelegraPh(media);
-      console.log("Uploaded to URL:", url);
+      await repondre(`TOXIC-MD\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ Uploading your media, please wait... ⏳\n◈━━━━━━━━━━━━━━━━◈`);
 
-      // Send the image with the generated URL
-      await zk.sendMessage(
-        dest,
-        {
-          image: { url: media },
-          caption: `𝐆𝐞𝐧𝐞𝐫𝐚𝐭𝐞𝐝 𝐈𝐮𝐚𝐠𝐞 𝐋𝐢𝐧𝐤: \n\n${util.format(url)}\n\n𝐏𝐨𝐰𝐞𝐫𝐞𝐝 𝐛𝐲 𝐱𝐡_𝐜𝐥𝐢𝐧𝐭𝐨𝐧`,
-        },
-        { quoted: ms }
-      );
+      // Download and validate media
+      const media = await zk.downloadMediaMessage(msgRepondu, 'buffer');
+      if (!media || media.length === 0) {
+        return repondre(`TOXIC-MD\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ Failed to download media. Please try again\n◈━━━━━━━━━━━━━━━━◈`);
+      }
 
-      // Clean up
-      await fs.unlinkSync(media);
-      console.log("Temporary file deleted");
-    } catch (e) {
-      console.error("Error in tourl:", e);
-      repondre(`𝐄𝐫𝐫𝐨𝐫 𝐠𝐞𝐧𝐞𝐫𝐚𝐭𝐢𝐧𝐠 𝐔𝐑𝐋: ${e.message}`);
+      // Check file size
+      const fileSizeMB = media.length / (1024 * 1024);
+      if (fileSizeMB > MAX_FILE_SIZE_MB) {
+        return repondre(`TOXIC-MD\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ File too large! Max ${MAX_FILE_SIZE_MB}MB\n│❒ Your file: ${fileSizeMB.toFixed(2)}MB\n◈━━━━━━━━━━━━━━━━◈`);
+      }
+
+      // Upload and validate response
+      const mediaUrl = await uploadMedia(media);
+      if (!mediaUrl) {
+        throw new Error('No URL returned from upload service');
+      }
+
+      // Determine media type for response
+      const mediaType = getMediaType(msgRepondu.mtype);
+      const successMessage = {
+        text: `TOXIC-MD\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ ${mediaType.toUpperCase()} URL 🔗\n│❒ ${mediaUrl}\n│❒ Powered by xh_clinton\n◈━━━━━━━━━━━━━━━━◈`
+      };
+
+      // For non-audio media, send as media message with caption
+      if (mediaType !== 'audio') {
+        successMessage[mediaType] = { url: mediaUrl };
+        successMessage.caption = successMessage.text;
+        delete successMessage.text;
+      }
+
+      await zk.sendMessage(dest, successMessage, { quoted: ms });
+
+    } catch (error) {
+      console.error('Command error:', error);
+      await repondre(`TOXIC-MD\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ Error: ${error.message}\n◈━━━━━━━━━━━━━━━━◈`);
     }
   }
 );
 
-module.exports = { zokou };
+function getMediaType(mtype) {
+  const typeMap = {
+    imageMessage: 'image',
+    videoMessage: 'video',
+    audioMessage: 'audio'
+  };
+  return typeMap[mtype] || 'file';
+}

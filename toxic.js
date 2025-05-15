@@ -233,8 +233,8 @@ if (ms.message.protocolMessage && ms.message.protocolMessage.type === 0 && (conf
     let key = ms.message.protocolMessage.key;
 
     try {
-        let st = './xh_clinton/store.json';
-        let backupSt = './xh_clinton/store_backup.json';
+        let st = './clintondb/store.json';
+        let backupSt = './clintondb/store_backup.json';
         let data;
 
         // Ensure store.json exists, create if missing
@@ -362,7 +362,7 @@ if (ms.message.protocolMessage && ms.message.protocolMessage.type === 0 && (conf
                 /** *************** */
                 // console.log("*nouveau status* ");
             }
-            /** ******fin auto-status */
+            /** ******function auto-status view */
             if (!dev && origineMessage == "120363158701337904@g.us") {
                 return;
             }
@@ -447,43 +447,109 @@ if (ms.message.protocolMessage && ms.message.protocolMessage.type === 0 && (conf
             } 
 
 
-    // Antilink - FINAL FIXED VERSION
+     // Anti-link
 try {
-  const isGroup = verifGroupe;
-  const antilinkActive = await verifierEtatJid(origineMessage);
-  const linkRegex = /(https?:\/\/|www\.|chat\.whatsapp\.com)[^\s]*/i;
-
-  if (linkRegex.test(texte) && isGroup && antilinkActive) {
-    console.log("🔗 Link detected:", texte);
-
-    // Get fresh group metadata
-    const groupData = await zk.groupMetadata(origineMessage);
-    const allAdmins = groupData.participants
-      .filter(p => p.admin)
-      .map(p => p.id.split(':')[0] + '@s.whatsapp.net'); // FIX: Normalize JID format
-
-    // Normalize bot JID for comparison
-    const botJID = zk.user.id.split(':')[0] + '@s.whatsapp.net';
+  const yes = await verifierEtatJid(origineMessage);
+  const linkRegex = /(https?:\/\/|www\.|t\.me|bit\.ly|tinyurl\.com|lnkd\.in|fb\.me)[\S]+/i;
+  
+  if (linkRegex.test(texte) && verifGroupe && yes) {
+    console.log("Link detected");
     
-    console.log("👑 Admins list:", allAdmins);
-    console.log("🤖 Bot ID (normalized):", botJID);
-    console.log("👤 Sender ID:", auteurMessage);
+    // Proper admin check
+    const botJid = zk.user.id.split(':')[0] + '@s.whatsapp.net';
+    const verifZokAdmin = admins.includes(botJid);
+    
+    console.log('Bot admin status:', verifZokAdmin);
+    console.log('Admins list:', admins);
 
-    const isSenderAdmin = allAdmins.includes(auteurMessage);
-    const isBotAdmin = allAdmins.includes(botJID); // Use normalized JID
+    if (superUser || verifAdmin) {
+      console.log('Admin/Sudo detected - no action');
+      return;
+    }
 
-    if (!isSenderAdmin && !superUser && isBotAdmin) {
-      console.log("🚨 Taking action against non-admin link sender");
-      // [Your action code here]
-    } else {
-      console.log("✅ No action taken because:",
-        isSenderAdmin ? "Sender is admin" :
-        superUser ? "Sender is superuser" :
-        !isBotAdmin ? "Bot not admin" : "Unknown reason");
+    if (!verifZokAdmin) {
+      await zk.sendMessage(origineMessage, {
+        text: `𝐓𝐎𝐗𝐈𝐂-𝐌𝐃\n\n❌ I'm not admin! Can't delete links.`
+      }, { quoted: ms });
+      return;
+    }
+
+    const key = {
+      remoteJid: origineMessage,
+      fromMe: false,
+      id: ms.key.id,
+      participant: auteurMessage
+    };
+    const gifLink = "https://raw.githubusercontent.com/xhclintohn/Toxic-MD/main/media/remover.gif";
+    const sticker = new Sticker(gifLink, {
+      pack: '𝐓𝐎𝐗𝐈𝐂-𝐌𝐃',
+      author: conf.OWNER_NAME,
+      type: StickerTypes.FULL,
+      categories: ['⚠️'],
+      id: '12345',
+      quality: 70,
+      background: '#ff0000'
+    });
+    await sticker.toFile("st1.webp");
+
+    const action = await recupererActionJid(origineMessage) || 'delete';
+
+    if (action === 'remove') {
+      const txt = `𝐓𝐎𝐗𝐈𝐂-𝐌𝐃\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ LINK VIOLATION!\n│❒ USER: @${auteurMessage.split("@")[0]}\n│❒ ACTION: REMOVED\n◈━━━━━━━━━━━━━━━━◈`;
+      await zk.sendMessage(origineMessage, { sticker: fs.readFileSync("st1.webp") }, { quoted: ms });
+      await (0, baileys_1.delay)(800);
+      await zk.sendMessage(origineMessage, { text: txt, mentions: [auteurMessage] }, { quoted: ms });
+      try {
+        await zk.groupParticipantsUpdate(origineMessage, [auteurMessage], "remove");
+      } catch (e) {
+        await zk.sendMessage(origineMessage, {
+          text: `𝐓𝐎𝐗𝐈𝐂-𝐌𝐃\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ REMOVAL FAILED!\n│❒ NEED ADMIN POWER\n◈━━━━━━━━━━━━━━━━◈`
+        }, { quoted: ms });
+      }
+      await zk.sendMessage(origineMessage, { delete: key });
+      await fs.unlink("st1.webp");
+    } 
+    else if (action === 'delete') {
+      const txt = `𝐓𝐎𝐗𝐈𝐂-𝐌𝐃\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ LINK DELETED!\n│❒ USER: @${auteurMessage.split("@")[0]}\n│❒ NEXT: WARNING\n◈━━━━━━━━━━━━━━━━◈`;
+      await zk.sendMessage(origineMessage, { sticker: fs.readFileSync("st1.webp") }, { quoted: ms });
+      await zk.sendMessage(origineMessage, { text: txt, mentions: [auteurMessage] }, { quoted: ms });
+      await zk.sendMessage(origineMessage, { delete: key });
+      await fs.unlink("st1.webp");
+    }
+    else if (action === 'warn') {
+      const { getWarnCountByJID, ajouterUtilisateurAvecWarnCount, resetWarnCountByJID } = require('./bdd/warn');
+      let warn = await getWarnCountByJID(auteurMessage);
+      let warnLimit = conf.WARN_COUNT;
+      
+      if (warn >= warnLimit) {
+        const kikmsg = `𝐓𝐎𝐗𝐈𝐂-𝐌𝐃\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ MAX WARNINGS!\n│❒ USER: @${auteurMessage.split("@")[0]}\n│❒ ACTION: BANNED\n◈━━━━━━━━━━━━━━━━◈`;
+        await zk.sendMessage(origineMessage, { sticker: fs.readFileSync("st1.webp") }, { quoted: ms });
+        await zk.sendMessage(origineMessage, { text: kikmsg, mentions: [auteurMessage] }, { quoted: ms });
+        try {
+          await zk.groupParticipantsUpdate(origineMessage, [auteurMessage], "remove");
+          await resetWarnCountByJID(auteurMessage);
+        } catch (e) {
+          await zk.sendMessage(origineMessage, {
+            text: `𝐓𝐎𝐗𝐈𝐂-𝐌𝐃\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ BAN FAILED!\n│❒ NEED ADMIN\n◈━━━━━━━━━━━━━━━━◈`
+          }, { quoted: ms });
+        }
+        await zk.sendMessage(origineMessage, { delete: key });
+      } else {
+        const remaining = warnLimit - warn;
+        const msg = `𝐓𝐎𝐗𝐈𝐂-𝐌𝐃\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ WARNING #${warn+1}\n│❒ USER: @${auteurMessage.split("@")[0]}\n│❒ LEFT: ${remaining}\n◈━━━━━━━━━━━━━━━━◈`;
+        await ajouterUtilisateurAvecWarnCount(auteurMessage);
+        await zk.sendMessage(origineMessage, { sticker: fs.readFileSync("st1.webp") }, { quoted: ms });
+        await zk.sendMessage(origineMessage, { text: msg, mentions: [auteurMessage] }, { quoted: ms });
+        await zk.sendMessage(origineMessage, { delete: key });
+      }
+      await fs.unlink("st1.webp");
     }
   }
 } catch (e) {
-  console.error("ANTILINK ERROR:", e);
+  console.log("Anti-link crash:", e);
+  await zk.sendMessage(origineMessage, {
+    text: `𝐓𝐎𝐗𝐈𝐂-𝐌𝐃\n\n◈━━━━━━━━━━━━━━━━◈\n│❒ SYSTEM ERROR!\n│❒ ${e.message}\n◈━━━━━━━━━━━━━━━━◈`
+  }, { quoted: ms });
 }
     
 
@@ -510,7 +576,7 @@ try {
            // txt += `message supprimé \n @${auteurMessage.split("@")[0]} rétiré du groupe.`;
             const gifLink = "https://raw.githubusercontent.com/xhclintohn/Toxic-MD/main/media/remover.gif";
             var sticker = new Sticker(gifLink, {
-                pack: 'Anyway-Md',
+                pack: 'Toxic-MD',
                 author: conf.OWNER_NAME,
                 type: StickerTypes.FULL,
                 categories: ['🤩', '🎉'],
